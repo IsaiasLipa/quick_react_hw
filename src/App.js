@@ -1,5 +1,31 @@
 import logo from './logo.svg';
 import './App.css';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { useJsonQuery } from './utilities/fetch';
+
+
+const Main = () => {
+  const [data, isLoading, error] = useJsonQuery('https://courses.cs.northwestern.edu/394/guides/data/cs-courses.php');
+
+  if (error) return <h1>Error loading user data: {`${error}`}</h1>;
+  if (isLoading) return <h1>Loading user data...</h1>;
+  if (!data) return <h1>No user data found</h1>;
+
+  return Object.keys(data.courses).map(item =>
+    <div class="card">
+      <div class="card-body">
+        <h5 class="card-title"> {data.courses[item].term}</h5>
+        <p class="card-text">CS {data.courses[item].number}: {data.courses[item].title}</p>
+        <div class="card-footer">
+          {data.courses[item].meets}
+        </div>
+      </div>
+    </div>
+  );
+
+}
+
+const queryClient = new QueryClient();
 
 const schedule = {
   "title": 'CS Courses 2022-2023',
@@ -29,44 +55,12 @@ function App() {
   return (
     <div className="App">
       <div class='container'>
-
-
         <h1>{schedule.title}</h1>
-        <div class="row">
-          <div class="col">
-            <div class="card">
-              <div class="card-body">
-                <h5 class="card-title"> {schedule.courses.F396.term}</h5>
-                <p class="card-text">CS {schedule.courses.F396.number}: {schedule.courses.F396.title}</p>
-                <div class="card-footer">
-                  {schedule.courses.F396.meets}
-                </div>
-              </div>
-            </div>
+        <QueryClientProvider client={queryClient}>
+          <div className="container">
+            <Main />
           </div>
-          <div class="col">
-            <div class="card">
-              <div class="card-body">
-                <h5 class="card-title"> {schedule.courses.F397.term}</h5>
-                <p class="card-text">CS {schedule.courses.F397.number}: {schedule.courses.F397.title}</p>
-                <div class="card-footer">
-                  {schedule.courses.F397.meets}
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="col">
-            <div class="card">
-              <div class="card-body">
-                <h5 class="card-title">{schedule.courses.F336.term}</h5>
-                <p class="card-text"> CS {schedule.courses.F336.number}: {schedule.courses.F336.title} </p>
-                <div class="card-footer">
-                  {schedule.courses.F336.meets}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+        </QueryClientProvider>
       </div>
     </div>
   );
