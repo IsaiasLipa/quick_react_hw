@@ -1,17 +1,21 @@
-import logo from './logo.svg';
+import { useState } from "react";
 import './App.css';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useJsonQuery } from './utilities/fetch';
 
 
-const Main = () => {
+const Main = ({term}) => {
   const [data, isLoading, error] = useJsonQuery('https://courses.cs.northwestern.edu/394/guides/data/cs-courses.php');
 
   if (error) return <h1>Error loading user data: {`${error}`}</h1>;
   if (isLoading) return <h1>Loading user data...</h1>;
   if (!data) return <h1>No user data found</h1>;
+  console.log(term);
+  let filterCourses= Object.keys(data.courses).filter(word => word.substring(0,1)=== term );
+  
+  console.log(filterCourses);
 
-  return Object.keys(data.courses).map(item =>
+  return filterCourses.map(item =>
     <div class="card">
       <div class="card-body">
         <h5 class="card-title"> {data.courses[item].term}</h5>
@@ -22,7 +26,6 @@ const Main = () => {
       </div>
     </div>
   );
-
 }
 
 const queryClient = new QueryClient();
@@ -52,13 +55,21 @@ const schedule = {
 };
 
 function App() {
+  const [term,setTerm]= useState("F");
   return (
     <div className="App">
       <div class='container'>
         <h1>{schedule.title}</h1>
+        <div class="btn-group" role="group" aria-label="Basic example">
+          <button type="button" class="btn btn-secondary" onClick={()=>{setTerm("F")}}>Fall</button>
+          <button type="button" class="btn btn-secondary" onClick={()=>{setTerm("W")}}>Winter</button>
+          <button type="button" class="btn btn-secondary" onClick={()=>{setTerm("S")}}>Spring</button>
+        </div>
+        <br/>
+        <br/>
         <QueryClientProvider client={queryClient}>
           <div className="container">
-            <Main />
+            <Main term={term}/>
           </div>
         </QueryClientProvider>
       </div>
